@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  ai_service:
+    build: 
+      context: ../ai_service
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    depends_on:
+      - mongodb
+
+  backend:
+    build: 
+      context: ../backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/chronosai?authSource=admin
+      - JWT_SECRET=super_secret_jwt_key_chronosai
+      - AI_SERVICE_URL=http://ai_service:8000
+    depends_on:
+      - mongodb
+      - ai_service
+
+volumes:
+  mongodb_data:
