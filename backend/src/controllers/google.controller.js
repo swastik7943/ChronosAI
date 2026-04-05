@@ -3,10 +3,11 @@ import User from '../models/User.model.js';
 import jwt from 'jsonwebtoken';
 
 const getOAuth2Client = () => {
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
     return new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
-        'http://localhost:5000/api/auth/google/callback'
+        `${backendUrl}/api/auth/google/callback`
     );
 }
 
@@ -60,9 +61,11 @@ export const googleCallback = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'super_secret', { expiresIn: '30d' });
 
-    res.redirect(`http://localhost:5173?token=${token}`);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}?token=${token}`);
   } catch (error) {
     console.error('Google Callback Error:', error);
-    res.redirect(`http://localhost:5173/login?error=oauth_failed`);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/login?error=oauth_failed`);
   }
 };

@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from datetime import date
 import dateparser
 import google.generativeai as genai
 from pydantic import BaseModel
@@ -85,8 +86,9 @@ def parse_message(text: str) -> ParsedResult:
         print("Warning: GEMINI_API_KEY is not configured yet. Fallback to basic intent extraction.")
         return fallback_parse(text, intent)
 
+    today_str = date.today().isoformat()
     prompt = f"""
-    Calculate dates assuming today is 2026-04-02.
+    Calculate dates assuming today is {today_str}.
     Analyze the user's scheduling message and extract the following details into a strict JSON format with exactly these keys:
     - "intent": string ("schedule", "reschedule", "cancel", or "unknown")
     - "date": string (YYYY-MM-DD) or null
