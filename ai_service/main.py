@@ -16,10 +16,12 @@ app.add_middleware(
 
 class ParseRequest(BaseModel):
     message: str
+    current_time: str | None = None  # ISO format with timezone e.g. "2026-04-21T08:00:00+05:30"
+    history: list[dict] | None = None  # [{role: 'user'|'model', content: str}]
 
 @app.post("/parse", response_model=ParsedResult)
 def parse_endpoint(request: ParseRequest):
-    result = parse_message(request.message)
+    result = parse_message(request.message, request.current_time, request.history)
     return result
 
 @app.get("/health")

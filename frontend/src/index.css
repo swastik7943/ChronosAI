@@ -23,8 +23,8 @@
 .fc-theme-standard td, .fc-theme-standard th { border-color: #e5e7eb !important; }
 .fc-theme-standard .fc-scrollgrid { border-color: #e5e7eb !important; }
 
-.fc-day-today { background-color: rgba(59, 130, 246, 0.05) !important; }
-.dark .fc-day-today { background-color: rgba(59, 130, 246, 0.1) !important; }
+.fc-day-today { background-color: rgba(59, 130, 246, 0.15) !important; border: 2px solid #3b82f6 !important; }
+.dark .fc-day-today { background-color: rgba(59, 130, 246, 0.25) !important; border: 2px solid #60a5fa !important; }
 .fc-day-sun { background-color: rgba(239, 68, 68, 0.05) !important; }
 
 .fc-col-header-cell-cushion, .fc-daygrid-day-number { color: #374151 !important; }

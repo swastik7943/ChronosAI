@@ -7,7 +7,7 @@ export default function MeetingRoom() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full h-full bg-gray-950 flex flex-col pt-2 pb-6 px-6">
+    <div className="w-full h-screen bg-gray-950 flex flex-col pt-2 pb-6 px-6">
       
       <button 
         onClick={() => navigate('/')}
@@ -19,7 +19,7 @@ export default function MeetingRoom() {
 
       <div className="w-full h-full flex-1 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl relative bg-black">
           <JitsiMeeting
-              domain="meet.jit.si"
+              domain={import.meta.env.VITE_JITSI_DOMAIN || "meet.jit.si"}
               roomName={roomId}
               configOverwrite={{
                   startWithAudioMuted: true,

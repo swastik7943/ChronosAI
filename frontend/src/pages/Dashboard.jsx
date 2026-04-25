@@ -26,12 +26,8 @@ export default function Dashboard({ token }) {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const [allRes, todayRes] = await Promise.all([
-        axios.get(`${API_URL}/api/meetings/all`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        axios.get(`${API_URL}/api/meetings/date/${selectedDate}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        axios.get(`${API_URL}/api/meetings/all`),
+        axios.get(`${API_URL}/api/meetings/date/${selectedDate}`)
       ]);
       setMeetings(allRes.data);
       // Filter out canceled ones if necessary, though backend should do it.
@@ -86,30 +82,42 @@ export default function Dashboard({ token }) {
                 <p className="text-sm italic">Clear schedule</p>
               </div>
             ) : (
-              todayMeetings.map(m => (
-                <div key={m._id} onClick={() => setSelectedMeeting(m)} className="group cursor-pointer bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 border border-gray-200 dark:border-gray-700/50 hover:border-indigo-500/30 p-4 rounded-xl shadow-sm relative overflow-hidden text-sm">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500/70 group-hover:bg-indigo-400 transition-colors"></div>
-                  <div className="font-semibold text-gray-900 dark:text-gray-100 mb-2 truncate">{m.title}</div>
-                  <div className="flex flex-col gap-1.5 text-xs text-gray-600 dark:text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-blue-400" /> 
-                      {formatTime(m.startTime, m.duration)}
+              todayMeetings.map(m => {
+                const isPast = (() => {
+                  if (!m.date || !m.startTime) return false;
+                  const dateObj = new Date(`${m.date}T${m.startTime}`);
+                  if (isNaN(dateObj.getTime())) return false;
+                  return new Date() > new Date(dateObj.getTime() + (m.duration * 60000));
+                })();
+                
+                return (
+                  <div key={m._id} onClick={() => setSelectedMeeting(m)} className={`group cursor-pointer bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 border border-gray-200 dark:border-gray-700/50 hover:border-indigo-500/30 p-4 rounded-xl shadow-sm relative overflow-hidden text-sm ${isPast ? 'opacity-60' : ''}`}>
+                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${isPast ? 'bg-gray-500/50' : 'bg-indigo-500/70 group-hover:bg-indigo-400'} transition-colors`}></div>
+                    <div className="font-semibold text-gray-900 dark:text-gray-100 mb-2 truncate flex justify-between items-start">
+                       {m.title}
+                       {isPast && <span className="text-[10px] bg-gray-500/10 text-gray-400 px-1.5 py-0.5 rounded leading-none">ENDED</span>}
                     </div>
-                    {m.participants?.length > 0 && (
+                    <div className="flex flex-col gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-2">
-                        <Users className="w-3.5 h-3.5 text-purple-400" /> 
-                        <span className="truncate">{m.participants.join(', ')}</span>
+                        <Clock className="w-3.5 h-3.5 text-blue-400" /> 
+                        {formatTime(m.startTime, m.duration)}
                       </div>
-                    )}
-                    {m.jitsiRoom && (
-                      <Link to={`/meet/${m.jitsiRoom}`} className="mt-1 flex items-center justify-center gap-1.5 w-full py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg transition-colors border border-indigo-500/20">
-                        <Video className="w-3.5 h-3.5" />
-                        Join Video
-                      </Link>
-                    )}
+                      {m.participants?.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Users className="w-3.5 h-3.5 text-purple-400" /> 
+                          <span className="truncate">{m.participants.join(', ')}</span>
+                        </div>
+                      )}
+                      {m.jitsiRoom && !isPast && (
+                        <Link onClick={(e) => e.stopPropagation()} to={`/meet/${m.jitsiRoom}`} className="mt-1 flex items-center justify-center gap-1.5 w-full py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg transition-colors border border-indigo-500/20">
+                          <Video className="w-3.5 h-3.5" />
+                          Join Video
+                        </Link>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
           <div className="pt-4 mt-auto border-t border-gray-200 dark:border-gray-800">
@@ -124,7 +132,7 @@ export default function Dashboard({ token }) {
 
         {/* Chat Widget Platform */}
         <div className="flex-1 overflow-hidden min-h-[300px]">
-           <ChatWidget token={token} onMeetingsChange={fetchMeetings} />
+           <ChatWidget onMeetingsChange={fetchMeetings} />
         </div>
       </div>
 
@@ -141,7 +149,7 @@ export default function Dashboard({ token }) {
         <MeetingDetailsModal 
            meeting={selectedMeeting} 
            onClose={() => setSelectedMeeting(null)} 
-           token={token} 
+           
            onMeetingCanceled={fetchMeetings} 
         />
       )}

@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import User from '../models/User.model.js';
 import jwt from 'jsonwebtoken';
+import { encrypt } from '../utils/encryption.js';
 
 const getOAuth2Client = () => {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
@@ -54,15 +55,21 @@ export const googleCallback = async (req, res) => {
        user.googleId = data.id;
     }
 
-    if (tokens.access_token) user.googleAccessToken = tokens.access_token;
-    if (tokens.refresh_token) user.googleRefreshToken = tokens.refresh_token;
+    if (tokens.access_token) user.googleAccessToken = encrypt(tokens.access_token);
+    if (tokens.refresh_token) user.googleRefreshToken = encrypt(tokens.refresh_token);
 
     await user.save();
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'super_secret', { expiresIn: '30d' });
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    res.redirect(`${frontendUrl}?token=${token}`);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+    res.redirect(`${frontendUrl}/`);
   } catch (error) {
     console.error('Google Callback Error:', error);
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';

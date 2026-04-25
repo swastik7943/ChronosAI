@@ -8,14 +8,16 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-password}
 
   ai_service:
     build: 
       context: ../ai_service
     ports:
       - "8000:8000"
+    env_file:
+      - ../.env
     environment:
       - PORT=8000
     depends_on:
@@ -26,14 +28,27 @@ services:
       context: ../backend
     ports:
       - "5000:5000"
+    env_file:
+      - ../.env
     environment:
       - PORT=5000
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/chronosai?authSource=admin
-      - JWT_SECRET=super_secret_jwt_key_chronosai
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-password}@mongodb:27017/chronosai?authSource=admin
       - AI_SERVICE_URL=http://ai_service:8000
     depends_on:
       - mongodb
       - ai_service
+
+  frontend:
+    build:
+      context: ../frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - ../.env
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
 
 volumes:
   mongodb_data:

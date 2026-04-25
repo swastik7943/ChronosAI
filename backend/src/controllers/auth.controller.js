@@ -19,11 +19,17 @@ export const registerUser = async (req, res) => {
     const user = await User.create({ name, email, password });
 
     if (user) {
+      const token = generateToken(user._id);
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
       res.status(201).json({
         _id: user._id,
         name: user.name,
-        email: user.email,
-        token: generateToken(user._id),
+        email: user.email
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -40,11 +46,17 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+      const token = generateToken(user._id);
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
       res.json({
         _id: user._id,
         name: user.name,
-        email: user.email,
-        token: generateToken(user._id),
+        email: user.email
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });

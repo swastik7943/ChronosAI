@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { Sun, Moon } from 'lucide-react';
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, theme, onToggleTheme }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +27,16 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center p-4">
+    <div className="flex-1 flex items-center justify-center p-4 relative min-h-screen">
+      {theme && onToggleTheme && (
+        <button 
+          onClick={onToggleTheme} 
+          className="absolute top-6 right-6 p-3 rounded-full bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-lg transition-all z-10"
+          title="Toggle Theme"
+        >
+          {theme === 'dark' ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+        </button>
+      )}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md backdrop-blur-sm transition-colors">
         <h2 className="text-3xl font-bold text-center mb-2 text-gray-900 dark:text-white">
           Welcome

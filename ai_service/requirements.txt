@@ -1,7 +1,6 @@
 fastapi
 uvicorn
-spacy
 dateparser
 pydantic
 python-dotenv
-google-generativeai
+google-genai

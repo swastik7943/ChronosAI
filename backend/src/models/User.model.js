@@ -7,9 +7,15 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: false }, // Made optional for OAuth users
   timezone: { type: String, default: 'UTC' },
   bufferTime: { type: Number, default: 0 },
+  workingHoursStart: { type: String, default: '09:00' }, // HH:mm format
+  workingHoursEnd: { type: String, default: '18:00' },
+  breakStart: { type: String, default: '13:00' },
+  breakEnd: { type: String, default: '14:00' },
+  offDays: { type: [Number], default: [0] }, // 0=Sunday, 1=Monday, ..., 6=Saturday
   googleId: { type: String },
   googleAccessToken: { type: String },
-  googleRefreshToken: { type: String }
+  googleRefreshToken: { type: String },
+  avatar: { type: String } // Base64 or URL
 }, {
   timestamps: true
 });

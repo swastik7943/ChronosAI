@@ -13,13 +13,31 @@ export default function CalendarWidget({ meetings, onDateClick, onEventClick }) 
        endStr = endDate.toISOString();
     }
     
+    // Determine status colors for Calendar Widget
+    const now = new Date();
+    const isEnded = new Date(endStr || startStr) <= now;
+    
+    let bgColor = 'rgba(79, 70, 229, 0.8)'; // default scheduled (indigo)
+    let borderColor = '#4338ca';
+    
+    if (m.status === 'canceled') {
+      bgColor = 'rgba(239, 68, 68, 0.8)'; // red
+      borderColor = '#ef4444';
+    } else if (isEnded) {
+      bgColor = 'rgba(107, 114, 128, 0.8)'; // gray
+      borderColor = '#6b7280';
+    } else if (m.isRescheduled) {
+      bgColor = 'rgba(245, 158, 11, 0.8)'; // amber
+      borderColor = '#f59e0b';
+    }
+
     return {
       id: m._id,
       title: m.title,
       start: startStr,
       end: endStr,
-      backgroundColor: 'rgba(79, 70, 229, 0.8)', // indigo-600 with opacity
-      borderColor: '#4338ca', // indigo-700
+      backgroundColor: bgColor,
+      borderColor: borderColor,
       textColor: '#ffffff',
       extendedProps: { rawMeeting: m }
     };
